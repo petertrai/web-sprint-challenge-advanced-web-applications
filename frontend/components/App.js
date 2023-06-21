@@ -43,14 +43,13 @@ export default function App() {
   const login = ({ username, password }) => {
     setMessage("");
     setSpinnerOn(true);
-    console.log({ username, password });
     axios
       .post(loginUrl, { username, password })
       .then((res) => {
         localStorage.setItem("token", res.data.token);
-        setMessage(res.data.message);
         redirectToArticles();
         setSpinnerOn(false);
+        setMessage(res.data.message);
       })
       .catch((err) => console.log(err));
     // ✨ implement
@@ -82,13 +81,32 @@ export default function App() {
     // Don't forget to turn off the spinner!
   };
 
+  const getArticlesNoMsg = () => {
+    setMessage("");
+    setSpinnerOn(true);
+    axiosWithAuth()
+      .get(articlesUrl)
+      .then((res) => {
+        setArticles(res.data.articles);
+      })
+      .catch((err) => console.log(err));
+    setSpinnerOn(false);
+    // ✨ implement
+    // We should flush the message state, turn on the spinner
+    // and launch an authenticated request to the proper endpoint.
+    // On success, we should set the articles in their proper state and
+    // put the server success message in its proper state.
+    // If something goes wrong, check the status of the response:
+    // if it's a 401 the token might have gone bad, and we should redirect to login.
+    // Don't forget to turn off the spinner!
+  };
+
   const postArticle = (article) => {
     setMessage("");
     setSpinnerOn(true);
     axiosWithAuth()
       .post(articlesUrl, article)
       .then((res) => {
-        console.log(res);
         setArticles([...articles, res.data.article]);
         setMessage(res.data.message);
       })
@@ -100,17 +118,33 @@ export default function App() {
     // to inspect the response from the server.
   };
 
-  const updateArticle = ( article_id, article ) => {
-    console.log('from update Artcicle', article_id);
+  const updateArticle = (article_id, article) => {
     setMessage("");
     setSpinnerOn(true);
     axiosWithAuth()
       .put(`${articlesUrl}/${article_id}`, article)
-      .then((res) => console.log(res), console.log(article_id))
+      .then(res => {
+        getArticlesNoMsg()
+        setMessage(res.data.message)
+      })
+         // Update the message state in App.js directly
       .catch((err) => console.log(err));
   };
 
-  const deleteArticle = (article_id) => {};
+  const deleteArticle = (article_id) => {
+      setMessage("");
+      setSpinnerOn(true);
+      axiosWithAuth()
+        .delete(`${articlesUrl}/${article_id}`)
+        .then(res => {
+          console.log('DELETEARTCIEL RES', res)
+          getArticlesNoMsg()
+          setMessage(res.data.message)
+        })
+           // Update the message state in App.js directly
+        .catch((err) => console.log(err));
+    
+  };
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
@@ -143,8 +177,11 @@ export default function App() {
                   currentArticleId={currentArticleId}
                   updateArticle={updateArticle}
                   getArticles={getArticles}
+                  message={message} // Pass message state as prop
+                  setMessage={setMessage} // Pass setMessage function as prop
                 />
                 <Articles
+                  deleteArticle={deleteArticle}
                   getArticles={getArticles}
                   articles={articles}
                   setCurrentArticleId={setCurrentArticleId}

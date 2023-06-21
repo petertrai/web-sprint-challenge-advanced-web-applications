@@ -14,7 +14,6 @@ export default function Articles(props) {
   }, []);
 
   useEffect(() => {
-    console.log("currentArticleId:", currentArticleId);
   }, [currentArticleId]);
 
   if (!localStorage.getItem("token")) {
@@ -23,14 +22,12 @@ export default function Articles(props) {
   }
 
   const handleEditClick = (article) => {
-    console.log("from handleEditCLick,", article);
     setCurrentArticleId(article);
-    console.log("from handleEditClick currentArticleId", currentArticleId);
     getArticles();
   };
 
-  const handleDeleteClick = () => {
-    getArticles();
+  const handleDeleteClick = (id) => {
+    props.deleteArticle(id)
   };
 
   return (
@@ -51,7 +48,7 @@ export default function Articles(props) {
                   <button disabled={false} onClick={() => handleEditClick(art)}>
                     Edit
                   </button>
-                  <button disabled={true} onClick={handleDeleteClick}>
+                  <button disabled={false} onClick={() => handleDeleteClick(art.article_id)}>
                     Delete
                   </button>
                 </div>

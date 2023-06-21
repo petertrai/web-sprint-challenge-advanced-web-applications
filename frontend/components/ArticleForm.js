@@ -25,21 +25,14 @@ export default function ArticleForm(props) {
 
   const onSubmit = (evt) => {
     evt.preventDefault();
-    if (currentArticleId) {
-      props.updateArticle(currentArticleId.article_id, values);
-      props.setCurrentArticleId(currentArticleId);
-    } else {
+    if (!currentArticleId) {
       props.postArticle(values);
-    }
-    // ✨ implement
-    // We must submit a new post or update an existing one,
-    // depending on the truthyness of the `currentArticle` prop.
-    props.getArticles();
+    } else {
+      props.updateArticle(currentArticleId.article_id, values);    }
     setValues(initialFormValues);
   };
 
   const onChange = (evt) => {
-    console.log('onChange')
     const { id, value } = evt.target;
     setValues({ ...values, [id]: value });
   };
@@ -47,7 +40,6 @@ export default function ArticleForm(props) {
   const isDisabled = () => {
     // ✨ implement
     // Make sure the inputs have some values
-    console.log(values)
     return values.title.trim().length > 0 &&
       values.text.trim().length > 0 &&
       values.topic.trim().length > 0
